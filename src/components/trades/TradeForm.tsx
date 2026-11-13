@@ -22,6 +22,7 @@ import {
   Camera,
   CheckCircle,
   Percent,
+  RotateCcw,
 } from 'lucide-react';
 
 interface TradeFormProps {
@@ -50,10 +51,45 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
     }));
   };
 
+  const getLocalCurrentDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return {
+      date: `${year}-${month}-${day}`,
+      entryTime: `${year}-${month}-${day}T${hours}:${minutes}`,
+      closedTime: `${year}-${month}-${day}T${hours}:${minutes}`,
+    };
+  };
+
+  const cleanPersistentTradeData = (data: any) => {
+    if (!data) return {};
+    const {
+      _id,
+      id,
+      userId,
+      tradeNumber,
+      date,
+      entryTime,
+      closedTime,
+      exitTime,
+      screenshots,
+      tradeSummary,
+      createdAt,
+      updatedAt,
+      __v,
+      ...rest
+    } = data;
+    return rest;
+  };
+
   const defaultTradeData = {
-    date: new Date().toISOString().split('T')[0],
-    entryTime: new Date().toISOString().substring(0, 16),
-    closedTime: new Date().toISOString().substring(0, 16),
+    date: getLocalCurrentDateTime().date,
+    entryTime: getLocalCurrentDateTime().entryTime,
+    closedTime: getLocalCurrentDateTime().closedTime,
     exitPrice: 0,
     pair: 'EUR/USD',
     session: 'London',
@@ -128,28 +164,66 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
   };
 
   const [formData, setFormData] = useState<any>(() => {
+    const currentTimes = getLocalCurrentDateTime();
     if (initialTrade) {
       return {
         ...defaultTradeData,
         ...initialTrade,
-        date: initialTrade.date ? new Date(initialTrade.date).toISOString().split('T')[0] : defaultTradeData.date,
-        entryTime: initialTrade.entryTime ? new Date(initialTrade.entryTime).toISOString().substring(0, 16) : defaultTradeData.entryTime,
+        date: initialTrade.date ? new Date(initialTrade.date).toISOString().split('T')[0] : currentTimes.date,
+        entryTime: initialTrade.entryTime ? new Date(initialTrade.entryTime).toISOString().substring(0, 16) : currentTimes.entryTime,
         closedTime: initialTrade.closedTime
           ? new Date(initialTrade.closedTime).toISOString().substring(0, 16)
           : initialTrade.exitTime
           ? new Date(initialTrade.exitTime).toISOString().substring(0, 16)
-          : defaultTradeData.closedTime,
+          : currentTimes.closedTime,
       };
     }
     if (typeof window !== 'undefined') {
+      const lastSaved = localStorage.getItem('last_entered_trade');
+      if (lastSaved) {
+        try {
+          const parsed = JSON.parse(lastSaved);
+          return {
+            ...defaultTradeData,
+            ...parsed,
+            // Strictly enforce current date and times for day and dates
+            date: currentTimes.date,
+            entryTime: currentTimes.entryTime,
+            closedTime: currentTimes.closedTime,
+            _id: undefined,
+            id: undefined,
+            tradeNumber: undefined,
+            screenshots: { before: '', atEntry: '', after: '', extras: [] },
+            tradeSummary: { text: '', isManual: false },
+          };
+        } catch {}
+      }
+
       const draft = localStorage.getItem('trade_draft');
       if (draft) {
         try {
-          return JSON.parse(draft);
+          const parsed = JSON.parse(draft);
+          return {
+            ...defaultTradeData,
+            ...parsed,
+            date: currentTimes.date,
+            entryTime: currentTimes.entryTime,
+            closedTime: currentTimes.closedTime,
+            _id: undefined,
+            id: undefined,
+            tradeNumber: undefined,
+            screenshots: { before: '', atEntry: '', after: '', extras: [] },
+            tradeSummary: { text: '', isManual: false },
+          };
         } catch {}
       }
     }
-    return defaultTradeData;
+    return {
+      ...defaultTradeData,
+      date: currentTimes.date,
+      entryTime: currentTimes.entryTime,
+      closedTime: currentTimes.closedTime,
+    };
   });
 
   const [screenshotFiles, setScreenshotFiles] = useState<{
@@ -162,12 +236,64 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
   const [submitting, setSubmitting] = useState(false);
   const [regeneratingSummary, setRegeneratingSummary] = useState(false);
 
-  // Auto-save draft
+  // Auto-save draft and persistent fields so form holds last entered data
   useEffect(() => {
     if (!isEditing && typeof window !== 'undefined') {
       localStorage.setItem('trade_draft', JSON.stringify(formData));
+      const persistent = cleanPersistentTradeData(formData);
+      localStorage.setItem('last_entered_trade', JSON.stringify(persistent));
     }
   }, [formData, isEditing]);
+
+  // If no previous trade data was in localStorage, fetch the most recent trade from API
+  useEffect(() => {
+    if (isEditing || initialTrade) return;
+    if (typeof window !== 'undefined' && (localStorage.getItem('last_entered_trade') || localStorage.getItem('trade_draft'))) {
+      return;
+    }
+
+    api.get('/trades?limit=1&sortBy=date&sortOrder=desc')
+      .then((res) => {
+        const trades = res.data?.data?.trades || res.data?.data;
+        if (Array.isArray(trades) && trades.length > 0) {
+          const lastTrade = trades[0];
+          const persistent = cleanPersistentTradeData(lastTrade);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('last_entered_trade', JSON.stringify(persistent));
+          }
+          const currentTimes = getLocalCurrentDateTime();
+          setFormData((prev: any) => ({
+            ...prev,
+            ...persistent,
+            // Keep current date and times
+            date: currentTimes.date,
+            entryTime: currentTimes.entryTime,
+            closedTime: currentTimes.closedTime,
+            _id: undefined,
+            id: undefined,
+            tradeNumber: undefined,
+            screenshots: { before: '', atEntry: '', after: '', extras: [] },
+            tradeSummary: { text: '', isManual: false },
+          }));
+        }
+      })
+      .catch(() => {});
+  }, [isEditing, initialTrade]);
+
+  const handleResetToDefaults = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('last_entered_trade');
+      localStorage.removeItem('trade_draft');
+    }
+    const currentTimes = getLocalCurrentDateTime();
+    setFormData({
+      ...defaultTradeData,
+      date: currentTimes.date,
+      entryTime: currentTimes.entryTime,
+      closedTime: currentTimes.closedTime,
+    });
+    toast('Form reset to default values', 'info');
+  };
 
   // Recalculate auto fields on price/balance/lot changes
   useEffect(() => {
@@ -337,13 +463,21 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
         const res = await api.patch(`/trades/${tradeId}`, formData);
         if (!res.data.success) throw new Error(res.data.message);
         returnedTrade = res.data.data;
+        if (typeof window !== 'undefined') {
+          const persistent = cleanPersistentTradeData(formData);
+          localStorage.setItem('last_entered_trade', JSON.stringify(persistent));
+        }
         success('Trade updated successfully!');
       } else {
         const res = await api.post('/trades', formData);
         if (!res.data.success) throw new Error(res.data.message);
         tradeId = res.data.data._id;
         returnedTrade = res.data.data;
-        localStorage.removeItem('trade_draft');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('trade_draft');
+          const persistent = cleanPersistentTradeData(formData);
+          localStorage.setItem('last_entered_trade', JSON.stringify(persistent));
+        }
         success('Trade saved to your journal!');
       }
 
@@ -390,9 +524,17 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
             {isEditing ? `#${formData.tradeNumber || '---'}` : '+'}
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              {isEditing ? `Edit Trade #${formData.tradeNumber || ''}` : t('btn.record_trade')}
-            </h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                {isEditing ? `Edit Trade #${formData.tradeNumber || ''}` : t('btn.record_trade')}
+              </h2>
+              {!isEditing && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  Holding last trade data • Fresh date/time
+                </span>
+              )}
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {t('section.basic')}
             </p>
@@ -400,6 +542,17 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
         </div>
 
         <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
+          {!isEditing && (
+            <button
+              type="button"
+              onClick={handleResetToDefaults}
+              title="Reset form to defaults"
+              className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>{t('btn.reset_defaults')}</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => router.back()}
@@ -441,9 +594,18 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
         {/* Row 1: Dates and Times */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              {t('field.date')} *
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {t('field.date')} *
+              </label>
+              <button
+                type="button"
+                onClick={() => setFormData((prev: any) => ({ ...prev, date: getLocalCurrentDateTime().date }))}
+                className="text-[10px] text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Today
+              </button>
+            </div>
             <input
               type="date"
               value={formData.date}
@@ -454,9 +616,18 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              {t('field.entry_time')}
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {t('field.entry_time')}
+              </label>
+              <button
+                type="button"
+                onClick={() => setFormData((prev: any) => ({ ...prev, entryTime: getLocalCurrentDateTime().entryTime }))}
+                className="text-[10px] text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Now
+              </button>
+            </div>
             <input
               type="datetime-local"
               value={formData.entryTime}
@@ -466,9 +637,18 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-              {t('field.closed_time')} *
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {t('field.closed_time')} *
+              </label>
+              <button
+                type="button"
+                onClick={() => setFormData((prev: any) => ({ ...prev, closedTime: getLocalCurrentDateTime().closedTime }))}
+                className="text-[10px] text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Now
+              </button>
+            </div>
             <input
               type="datetime-local"
               value={formData.closedTime}

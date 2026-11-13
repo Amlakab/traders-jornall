@@ -36,6 +36,7 @@ const translations: Record<Language, Record<string, string>> = {
     'btn.export_pdf': 'PDF',
     'btn.view_all_trades': 'View All Trades in this Period',
     'btn.reset_all': 'Reset All',
+    'btn.reset_defaults': 'Reset Defaults',
     'btn.compare_before_after': 'Compare Before vs After',
 
     // Fields
@@ -125,6 +126,7 @@ const translations: Record<Language, Record<string, string>> = {
     'btn.export_pdf': 'PDF ላክ',
     'btn.view_all_trades': 'የዚህን ጊዜ ሁሉንም ንግዶች አሳይ',
     'btn.reset_all': 'ሁሉንም ዳግም አስጀምር',
+    'btn.reset_defaults': 'ወደ መጀመሪያው መልስ',
     'btn.compare_before_after': 'ከመግባት በፊት እና በኋላ አነጻጽር',
 
     // Fields
