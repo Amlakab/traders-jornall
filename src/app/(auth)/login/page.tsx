@@ -119,40 +119,8 @@ export default function LoginPage() {
           </form>
 
           {/* Quick Demo Logins */}
-          <div className="pt-4 border-t border-slate-800 space-y-2">
-            <span className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center">
-              Quick Demo Accounts
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('trader')}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-blue-500/50 text-left transition-all group"
-              >
-                <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs mb-0.5">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  Trader Demo
-                </div>
-                <div className="text-[10px] text-slate-500 font-mono truncate">
-                  trader@journal.local
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('admin')}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-purple-500/50 text-left transition-all group"
-              >
-                <div className="flex items-center gap-1.5 text-purple-400 font-bold text-xs mb-0.5">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Admin Demo
-                </div>
-                <div className="text-[10px] text-slate-500 font-mono truncate">
-                  admin@journal.local
-                </div>
-              </button>
-            </div>
-          </div>
+          
+          
         </div>
 
         <p className="text-center text-xs text-slate-500 font-mono">
