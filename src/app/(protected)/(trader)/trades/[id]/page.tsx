@@ -116,7 +116,14 @@ export default function TradeDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           <span>Exit Edit Mode</span>
         </button>
-        <TradeForm initialTrade={trade} isEditing={true} />
+        <TradeForm
+          initialTrade={trade}
+          isEditing={true}
+          onSuccess={(updatedTrade) => {
+            setTrade(updatedTrade);
+            setIsEditMode(false);
+          }}
+        />
       </div>
     );
   }
@@ -127,22 +134,22 @@ export default function TradeDetailPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-20">
       {/* Top Navigation & Action Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push('/trades')}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors shrink-0"
             title="Back to trades"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg font-black text-slate-900 dark:text-white font-mono">
+              <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
                 Trade #{trade.tradeNumber.toString().padStart(3, '0')}
               </span>
               <span
-                className={`px-2.5 py-0.5 rounded-md text-xs font-extrabold uppercase ${
+                className={`px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-extrabold uppercase ${
                   trade.direction?.toLowerCase() === 'buy'
                     ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800'
                     : 'bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-800'
@@ -151,17 +158,17 @@ export default function TradeDetailPage() {
                 {trade.direction} {trade.pair}
               </span>
               {trade.strategyType && (
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+                <span className="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
                   {trade.strategyType}
                 </span>
               )}
               {trade.setupType && (
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
+                <span className="px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800">
                   Setup: {trade.setupType}
                 </span>
               )}
               <span
-                className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase ${
+                className={`px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold uppercase ${
                   trade.result?.toLowerCase() === 'win'
                     ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800'
                     : trade.result?.toLowerCase() === 'loss'
@@ -172,7 +179,7 @@ export default function TradeDetailPage() {
                 {trade.result || 'Break-even'}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
               Entered: {formatDateTime(trade.entryTime || trade.date)}
               {trade.closedTime && ` • Closed: ${formatDateTime(trade.closedTime)}`} • {trade.session} Session
             </p>
@@ -180,12 +187,12 @@ export default function TradeDetailPage() {
         </div>
 
         {/* PnL and Actions */}
-        <div className="flex items-center gap-3">
-          <div className="text-right pr-3 border-r border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-800">
+          <div className="text-left sm:text-right pr-3 border-r border-slate-200 dark:border-slate-800">
             <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
               Net Realized P/L
             </span>
-            <div className="flex items-baseline gap-1.5 justify-end">
+            <div className="flex items-baseline gap-1.5 justify-start sm:justify-end">
               <span
                 className={`text-xl font-extrabold font-mono ${
                   pnlVal > 0 ? 'text-emerald-600 dark:text-emerald-400' : pnlVal < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-300'

@@ -27,9 +27,10 @@ import {
 interface TradeFormProps {
   initialTrade?: Partial<Trade>;
   isEditing?: boolean;
+  onSuccess?: (trade: Trade) => void;
 }
 
-export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = false }) => {
+export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = false, onSuccess }) => {
   const router = useRouter();
   const { success, error, toast } = useToast();
   const { t } = useLanguage();
@@ -57,7 +58,7 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
     pair: 'EUR/USD',
     session: 'London',
     direction: 'Buy',
-    strategyType: 'ICT',
+    strategyType: 'Price Action',
     setupType: 'A+',
     accountBalance: 10000,
     entryTF: '5M',
@@ -330,15 +331,18 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
     try {
       setSubmitting(true);
       let tradeId = initialTrade?._id;
+      let returnedTrade = null;
 
       if (isEditing && tradeId) {
         const res = await api.patch(`/trades/${tradeId}`, formData);
         if (!res.data.success) throw new Error(res.data.message);
+        returnedTrade = res.data.data;
         success('Trade updated successfully!');
       } else {
         const res = await api.post('/trades', formData);
         if (!res.data.success) throw new Error(res.data.message);
         tradeId = res.data.data._id;
+        returnedTrade = res.data.data;
         localStorage.removeItem('trade_draft');
         success('Trade saved to your journal!');
       }
@@ -356,12 +360,20 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
           screenshotFiles.extras.forEach((f) => uploadData.append('extras', f));
         }
 
-        await api.post(`/trades/${tradeId}/screenshots`, uploadData, {
+        const uploadRes = await api.post(`/trades/${tradeId}/screenshots`, uploadData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
+        if (uploadRes.data?.data) {
+          returnedTrade = uploadRes.data.data;
+        }
       }
 
-      router.push(`/trades/${tradeId}`);
+      if (isEditing && onSuccess && returnedTrade) {
+        onSuccess(returnedTrade);
+      } else {
+        router.push(`/trades/${tradeId}`);
+        router.refresh();
+      }
     } catch (err: any) {
       error(err.response?.data?.message || err.message || 'Failed to save trade');
     } finally {
@@ -371,38 +383,38 @@ export const TradeForm: React.FC<TradeFormProps> = ({ initialTrade, isEditing = 
 
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-6 pb-20">
-      {/* Top Action Bar */}
-      <div className="flex items-center justify-between bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 sticky top-20 z-30 shadow-xl transition-colors">
+      {/* Top Action Bar (Naturally scrollable with the page, fully responsive) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center dark:text-blue-400 font-bold shrink-0">
             {isEditing ? `#${formData.tradeNumber || '---'}` : '+'}
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">
               {isEditing ? `Edit Trade #${formData.tradeNumber || ''}` : t('btn.record_trade')}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {t('section.basic')}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition-colors"
+            className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-center"
           >
             {t('btn.cancel')}
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all"
+            className="flex-1 sm:flex-none px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 transition-all"
           >
             <Save className="w-4 h-4" />
             <span>{submitting ? 'Saving...' : isEditing ? t('btn.update_trade') : t('btn.save_trade')}</span>
-            <kbd className="px-1.5 py-0.5 text-[10px] bg-blue-700 rounded border border-blue-500">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-blue-700 rounded border border-blue-500">
               Ctrl+S
             </kbd>
           </button>

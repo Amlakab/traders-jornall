@@ -165,7 +165,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Add Option Form */}
-          <form onSubmit={handleAddOption} className="flex items-center gap-2">
+          <form onSubmit={handleAddOption} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <input
               type="text"
               value={newOptionValue}
@@ -176,7 +176,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={!newOptionValue.trim()}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-blue-500/20"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-500/20 self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
               Add Option

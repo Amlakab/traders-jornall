@@ -86,17 +86,17 @@ export default function TradesLogPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-white">Trading Journal Log</h1>
-          <p className="text-xs text-slate-400">
+          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">Trading Journal Log</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Audit, filter, and inspect your full trade history
           </p>
         </div>
 
         <button
           onClick={() => router.push('/trades/new')}
-          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all"
+          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 transition-all self-start sm:self-auto"
         >
           <PlusCircle className="w-4 h-4" />
           <span>Record New Trade</span>
@@ -105,7 +105,7 @@ export default function TradesLogPage() {
 
       {/* Search Input Bar */}
       <div className="relative">
-        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 pointer-events-none">
+        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 dark:text-slate-500 pointer-events-none">
           <Search className="w-4 h-4" />
         </span>
         <input
@@ -113,7 +113,7 @@ export default function TradesLogPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search trades by asset, notes, narrative tags, or summary..."
-          className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-900 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
         />
       </div>
 

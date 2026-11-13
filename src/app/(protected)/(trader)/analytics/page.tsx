@@ -80,10 +80,10 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-white">Performance Analytics & Edge Audit</h1>
-          <p className="text-xs text-slate-400">
+          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">Performance Analytics & Edge Audit</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Statistical breakdown of profit factor, win rates, sessions, and discipline
           </p>
         </div>
@@ -96,11 +96,11 @@ export default function AnalyticsPage() {
             className={`px-4 py-2 text-xs font-semibold rounded-xl flex items-center gap-2 border transition-all ${
               isCompareMode
                 ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20'
-                : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
             }`}
           >
             <ArrowLeftRight className="w-4 h-4" />
-            <span>{isCompareMode ? 'Switch to Standard Analytics' : 'Period Comparison Mode'}</span>
+            <span>{isCompareMode ? 'Standard Analytics' : 'Period Comparison'}</span>
           </button>
         </div>
       </div>

@@ -117,7 +117,7 @@ export default function AdminGlobalSettingsPage() {
       </div>
 
       {/* Add Global Option Form */}
-      <form onSubmit={handleAddGlobalOption} className="flex items-center gap-2">
+      <form onSubmit={handleAddGlobalOption} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <input
           type="text"
           value={newOptionValue}
@@ -128,7 +128,7 @@ export default function AdminGlobalSettingsPage() {
         <button
           type="submit"
           disabled={!newOptionValue.trim()}
-          className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-md shadow-purple-500/20"
+          className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md shadow-purple-500/20 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           Add System Option

@@ -185,7 +185,7 @@ export const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
           </div>
 
           {/* Granular Filters Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {/* Direction */}
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
@@ -308,19 +308,19 @@ export const AdvancedFilterPanel: React.FC<AdvancedFilterPanelProps> = ({
           </div>
 
           {/* Save Preset Input Form */}
-          <form onSubmit={handleSavePreset} className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/60">
-            <span className="text-xs text-slate-500 dark:text-slate-400">Save active filters as preset:</span>
+          <form onSubmit={handleSavePreset} className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-800/60">
+            <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">Save active filters as preset:</span>
             <input
               type="text"
-              placeholder="e.g. ICT London Gold Scalps"
+              placeholder="e.g. London Gold Scalps"
               value={presetName}
               onChange={(e) => setPresetName(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <button
               type="submit"
               disabled={isSavingPreset || !presetName.trim()}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors self-start sm:self-auto"
             >
               <Save className="w-3.5 h-3.5" />
               Save Preset

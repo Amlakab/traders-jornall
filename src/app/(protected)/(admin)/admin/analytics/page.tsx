@@ -42,69 +42,69 @@ export default function AdminAnalyticsPage() {
   const { overview, kpis, equityCurve, sessionBreakdown, pairBreakdown } = data || {};
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 pb-16">
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-extrabold text-white">System-Wide Platform Analytics</h1>
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-950 text-purple-300 border border-purple-800 flex items-center gap-1">
+          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">System-Wide Platform Analytics</h1>
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800 flex items-center gap-1">
             <ShieldCheck className="w-3 h-3" /> Admin Scope
           </span>
         </div>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           Holistic performance metrics, risk, and volume across all registered traders
         </p>
       </div>
 
       {/* Platform Overview Tiles */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-blue-400" />
-            Registered Traders
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <Users className="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0" />
+            Traders
           </span>
-          <div className="text-2xl font-extrabold text-white">
+          <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
             {overview?.totalTraders || 0}
           </div>
-          <p className="text-[11px] text-emerald-400 font-medium">
-            {overview?.activeTraders || 0} Active Traders
+          <p className="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
+            {overview?.activeTraders || 0} Active
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4 text-purple-400" />
-            Total Trades Logged
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-400 shrink-0" />
+            Trades Logged
           </span>
-          <div className="text-2xl font-extrabold text-white">
+          <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
             {overview?.totalTradesLogged || 0}
           </div>
-          <p className="text-[11px] text-slate-500">Across all market sessions</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">All market sessions</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
             System Net P/L
           </span>
           <div
-            className={`text-2xl font-extrabold ${
-              overview?.systemNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'
+            className={`text-xl sm:text-2xl font-extrabold ${
+              overview?.systemNetPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
             }`}
           >
             {formatCurrency(overview?.systemNetPnl || 0)}
           </div>
-          <p className="text-[11px] text-slate-500">Combined trader equity</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">Combined equity</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Percent className="w-4 h-4 text-amber-400" />
-            System Win Rate
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-1 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <Percent className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
+            Win Rate
           </span>
-          <div className="text-2xl font-extrabold text-blue-400">
+          <div className="text-xl sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400">
             {overview?.systemWinRate || 0}%
           </div>
-          <p className="text-[11px] text-slate-500">Platform average</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">Platform avg</p>
         </div>
       </div>
 

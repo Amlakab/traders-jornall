@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useMobileNav } from '@/context/MobileNavContext';
 import {
   LayoutDashboard,
   BookOpen,
@@ -18,6 +19,7 @@ import {
   Sun,
   Activity,
   Languages,
+  X,
 } from 'lucide-react';
 
 interface SidebarLink {
@@ -33,6 +35,7 @@ export const Sidebar: React.FC = () => {
   const { user, logout, isAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
+  const { isOpen, close } = useMobileNav();
 
   const traderLinks: SidebarLink[] = [
     { href: '/dashboard', labelKey: 'nav.dashboard', icon: LayoutDashboard },
@@ -51,10 +54,15 @@ export const Sidebar: React.FC = () => {
 
   const links = isAdmin ? adminLinks : traderLinks;
 
-  return (
-    <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-screen select-none shrink-0 transition-colors">
+  const handleNavClick = (href: string) => {
+    close();
+    router.push(href);
+  };
+
+  const renderContent = (isMobile = false) => (
+    <div className="flex flex-col h-full bg-slate-950 text-slate-100 select-none">
       {/* Brand Header */}
-      <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+      <div className="p-4 sm:p-5 border-b border-slate-800/80 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
             <Activity className="w-5 h-5" />
@@ -67,27 +75,42 @@ export const Sidebar: React.FC = () => {
           </div>
         </div>
 
-        <span
-          className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
-            isAdmin
-              ? 'bg-purple-950/80 text-purple-300 border border-purple-800'
-              : 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
-          }`}
-        >
-          {user?.role || 'Guest'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+              isAdmin
+                ? 'bg-purple-950/80 text-purple-300 border border-purple-800'
+                : 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
+            }`}
+          >
+            {user?.role || 'Guest'}
+          </span>
+
+          {isMobile && (
+            <button
+              type="button"
+              onClick={close}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ml-1"
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Navigation Links */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {links.map((link) => {
           const Icon = link.icon;
-          const isActive = pathname === link.href || (link.href !== '/dashboard' && pathname?.startsWith(link.href) && link.href !== '/trades');
+          const isActive =
+            pathname === link.href ||
+            (link.href !== '/dashboard' && pathname?.startsWith(link.href) && link.href !== '/trades');
 
           return (
             <button
               key={link.href}
-              onClick={() => router.push(link.href)}
+              onClick={() => handleNavClick(link.href)}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30 font-semibold'
@@ -141,13 +164,41 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <button
-          onClick={logout}
+          onClick={() => {
+            close();
+            logout();
+          }}
           className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 rounded-xl transition-colors"
         >
           <LogOut className="w-4 h-4" />
           <span>{t('nav.sign_out')}</span>
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden md:flex w-64 border-r border-slate-800 flex-col h-screen shrink-0 transition-colors">
+        {renderContent(false)}
+      </aside>
+
+      {/* Mobile Drawer Overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div
+            onClick={close}
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+          />
+
+          {/* Drawer Menu */}
+          <aside className="fixed inset-y-0 left-0 w-72 max-w-[85vw] border-r border-slate-800 z-50 flex flex-col shadow-2xl transition-transform animate-in slide-in-from-left duration-200">
+            {renderContent(true)}
+          </aside>
+        </div>
+      )}
+    </>
   );
 };

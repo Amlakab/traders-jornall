@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { MobileNavProvider } from '@/context/MobileNavContext';
 
 export const metadata: Metadata = {
   title: 'TradeX Journal - Advanced Multi-User Trading Journal',
@@ -23,7 +24,9 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <ToastProvider>
-                {children}
+                <MobileNavProvider>
+                  {children}
+                </MobileNavProvider>
               </ToastProvider>
             </AuthProvider>
           </LanguageProvider>
